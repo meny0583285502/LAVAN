@@ -1,0 +1,246 @@
+<html>
+<head>
+<meta charset="UTF-8">
+<title>NetBlocker — התקנה</title>
+<HTA:APPLICATION
+  APPLICATIONNAME="NetBlocker Setup"
+  BORDER="thin"
+  CAPTION="yes"
+  SHOWINTASKBAR="yes"
+  SINGLEINSTANCE="yes"
+  WINDOWSTATE="normal"
+/>
+<style>
+* { box-sizing:border-box; margin:0; padding:0; font-family:'Segoe UI',Arial,sans-serif; }
+body { background:#0f172a; color:#e2e8f0; direction:rtl; overflow:hidden; }
+.screen { display:none; width:100vw; height:100vh; flex-direction:column; align-items:center; justify-content:center; padding:32px; }
+.screen.active { display:flex; }
+
+/* SPLASH */
+#splash { background:linear-gradient(135deg,#0f172a 0%,#1e1b4b 100%); }
+.logo-icon { font-size:64px; text-align:center; }
+.logo-title { font-size:2.4rem; font-weight:800; color:#60a5fa; letter-spacing:2px; text-align:center; margin-top:8px; }
+.logo-sub { color:#94a3b8; font-size:0.95rem; text-align:center; margin-top:6px; margin-bottom:36px; }
+.splash-btn { background:linear-gradient(135deg,#2563eb,#7c3aed); color:white; border:none; border-radius:12px; padding:16px 48px; font-size:1.1rem; font-weight:700; cursor:pointer; font-family:inherit; }
+.version { color:#475569; font-size:0.75rem; margin-top:24px; }
+
+/* FORM */
+.form-card { background:#1e293b; border:1px solid #334155; border-radius:16px; padding:36px 40px; width:460px; }
+.form-header { text-align:center; margin-bottom:24px; }
+.form-header h2 { font-size:1.4rem; color:#60a5fa; font-weight:700; }
+.form-header p { color:#94a3b8; font-size:0.85rem; margin-top:5px; }
+.field { margin-bottom:14px; }
+.field label { display:block; font-size:0.82rem; color:#94a3b8; margin-bottom:4px; }
+.field input { width:100%; background:#0f172a; border:1.5px solid #334155; color:#e2e8f0; border-radius:8px; padding:10px 14px; font-size:0.95rem; outline:none; font-family:inherit; }
+.divider { display:flex; align-items:center; gap:10px; margin:14px 0; color:#475569; font-size:0.8rem; }
+.divider::before,.divider::after { content:''; flex:1; height:1px; background:#334155; }
+.google-btn { width:100%; background:white; color:#1e293b; border:none; border-radius:8px; padding:10px; font-size:0.9rem; font-weight:600; cursor:pointer; margin-bottom:14px; font-family:inherit; }
+.install-btn { width:100%; background:linear-gradient(135deg,#2563eb,#7c3aed); color:white; border:none; border-radius:10px; padding:13px; font-size:1rem; font-weight:700; cursor:pointer; font-family:inherit; }
+.terms { color:#64748b; font-size:0.74rem; text-align:center; margin-top:10px; }
+
+/* PROGRESS */
+.progress-card { background:#1e293b; border:1px solid #334155; border-radius:16px; padding:40px; width:460px; text-align:center; }
+.progress-title { font-size:1.2rem; font-weight:700; color:#60a5fa; margin-bottom:6px; }
+.progress-sub { color:#94a3b8; font-size:0.85rem; margin-bottom:24px; }
+.bar-wrap { background:#0f172a; border-radius:99px; height:8px; overflow:hidden; margin-bottom:16px; }
+.bar { height:100%; background:linear-gradient(90deg,#2563eb,#7c3aed); border-radius:99px; width:0%; transition:width 0.5s ease; }
+.steps { text-align:right; }
+.step { display:flex; align-items:center; gap:10px; padding:6px 0; color:#64748b; font-size:0.85rem; }
+.step.done { color:#86efac; }
+.step.active { color:#93c5fd; }
+.dot { width:8px; height:8px; border-radius:50%; background:#334155; flex-shrink:0; }
+.step.done .dot { background:#22c55e; }
+.step.active .dot { background:#60a5fa; }
+
+/* DONE */
+#done { background:linear-gradient(135deg,#0f172a 0%,#14532d 100%); }
+.done-icon { font-size:72px; text-align:center; margin-bottom:16px; }
+.done-title { font-size:1.8rem; font-weight:800; color:#86efac; text-align:center; margin-bottom:8px; }
+.done-sub { color:#94a3b8; text-align:center; margin-bottom:28px; }
+.done-btn { background:#16a34a; color:white; border:none; border-radius:12px; padding:14px 40px; font-size:1rem; font-weight:700; cursor:pointer; font-family:inherit; }
+</style>
+</head>
+<body>
+
+<div class="screen active" id="splash">
+  <div class="logo-icon">🛡️</div>
+  <div class="logo-title">NetBlocker</div>
+  <div class="logo-sub">מערכת ניהול גלישה חכמה</div>
+  <button class="splash-btn" onclick="show('form')">▶ התחל הגדרה</button>
+  <div class="version">v1.0.0 | LAVAN System</div>
+</div>
+
+<div class="screen" id="form">
+  <div class="form-card">
+    <div class="form-header">
+      <h2>🛡️ רישום למערכת</h2>
+      <p>הכנס פרטים לאזור האישי שלך</p>
+    </div>
+    <div class="field"><label>שם מלא</label><input id="fName" placeholder="ישראל ישראלי"></div>
+    <div class="field"><label>טלפון</label><input id="fPhone" placeholder="050-0000000"></div>
+    <div class="field"><label>אימייל</label><input id="fEmail" placeholder="israel@gmail.com"></div>
+    <div class="divider">או התחבר עם</div>
+    <button class="google-btn" onclick="loginGoogle()">🔵 המשך עם Google</button>
+    <button class="install-btn" onclick="startInstall()">⚡ התקן עכשיו</button>
+    <p class="terms">על ידי לחיצה על התקן, אתה מסכים לתנאי השימוש</p>
+  </div>
+</div>
+
+<div class="screen" id="progress">
+  <div class="progress-card">
+    <div class="progress-title">מתקין NetBlocker...</div>
+    <div class="progress-sub" id="pSub">מכין את המערכת</div>
+    <div class="bar-wrap"><div class="bar" id="pBar"></div></div>
+    <div class="steps">
+      <div class="step" id="s1"><div class="dot"></div>יצירת תיקיות מערכת</div>
+      <div class="step" id="s2"><div class="dot"></div>הגדרת חסימות ב-Hosts</div>
+      <div class="step" id="s3"><div class="dot"></div>חסימת Firewall</div>
+      <div class="step" id="s4"><div class="dot"></div>רישום סטארטאפ אוטומטי</div>
+      <div class="step" id="s5"><div class="dot"></div>שליחת אישור למנהל</div>
+    </div>
+  </div>
+</div>
+
+<div class="screen" id="done">
+  <div class="done-icon">✅</div>
+  <div class="done-title">ההתקנה הושלמה!</div>
+  <div class="done-sub">NetBlocker פעיל ומוגן.<br>האזור האישי שלך מוכן.</div>
+  <button class="done-btn" onclick="openDash()">פתח אזור אישי ←</button>
+</div>
+
+<script language="VBScript">
+Function VBShell(cmd)
+  Dim s
+  Set s = CreateObject("WScript.Shell")
+  s.Run "powershell -WindowStyle Hidden -ExecutionPolicy Bypass -Command " & Chr(34) & cmd & Chr(34), 0, True
+End Function
+
+Function VBWrite(path, txt)
+  Dim fso, f
+  Set fso = CreateObject("Scripting.FileSystemObject")
+  Set f = fso.CreateTextFile(path, True, True)
+  f.Write txt
+  f.Close
+End Function
+
+Function VBRead(path)
+  Dim fso, f
+  Set fso = CreateObject("Scripting.FileSystemObject")
+  If fso.FileExists(path) Then
+    Set f = fso.OpenTextFile(path, 1, False, -1)
+    VBRead = f.ReadAll
+    f.Close
+  Else
+    VBRead = ""
+  End If
+End Function
+
+Function VBMkDir(path)
+  Dim fso
+  Set fso = CreateObject("Scripting.FileSystemObject")
+  If Not fso.FolderExists(path) Then fso.CreateFolder(path)
+End Function
+</script>
+
+<script language="JavaScript">
+var CFG = {
+  installDir:  "C:\\NetBlocker",
+  githubBase:  "https://meny0583285502.github.io/LAVAN",
+  adminEmail:  "6183444@gmail.com",
+  ejsService:  "YOUR_SERVICE_ID",
+  ejsRegTpl:   "template_register",
+  ejsKey:      "YOUR_PUBLIC_KEY",
+  profile:     "default"
+};
+var user = {name:"", phone:"", email:"", google:false};
+
+function show(id) {
+  var all = document.querySelectorAll('.screen');
+  for(var i=0;i<all.length;i++) all[i].classList.remove('active');
+  document.getElementById(id).classList.add('active');
+}
+
+function loginGoogle() {
+  try { new ActiveXObject("WScript.Shell").Run("https://accounts.google.com/signin"); } catch(e){}
+  user.google = true;
+  document.querySelector('.google-btn').innerText = "✅ חשבון Google מקושר";
+}
+
+function startInstall() {
+  user.name  = document.getElementById('fName').value;
+  user.phone = document.getElementById('fPhone').value;
+  user.email = document.getElementById('fEmail').value;
+  if(!user.name || !user.email) { alert("נא למלא שם ואימייל"); return; }
+  show('progress');
+  step1();
+}
+
+function setS(n,st){ document.getElementById('s'+n).className='step '+st; }
+function setBar(p,t){ document.getElementById('pBar').style.width=p+'%'; document.getElementById('pSub').innerText=t; }
+
+function step1(){
+  setS(1,'active'); setBar(10,'יוצר תיקיות...');
+  try {
+    VBMkDir(CFG.installDir);
+    VBWrite(CFG.installDir+"\\user.json", JSON.stringify(user,null,2));
+  } catch(e){}
+  setTimeout(step2, 900);
+}
+function step2(){
+  setS(1,'done'); setS(2,'active'); setBar(30,'מגדיר חסימות Hosts...');
+  try {
+    var sh = new ActiveXObject("WScript.Shell");
+    sh.Run('powershell -WindowStyle Hidden -ExecutionPolicy Bypass -File "'+CFG.installDir+'\\blocker.ps1" -ProfileName "'+CFG.profile+'" -GitHubBase "'+CFG.githubBase+'/profiles"',0,true);
+  } catch(e){}
+  setTimeout(step3, 1200);
+}
+function step3(){
+  setS(2,'done'); setS(3,'active'); setBar(55,'מגדיר Firewall...');
+  setTimeout(step4, 1000);
+}
+function step4(){
+  setS(3,'done'); setS(4,'active'); setBar(75,'רושם סטארטאפ...');
+  try {
+    var sh = new ActiveXObject("WScript.Shell");
+    sh.Run('powershell -WindowStyle Hidden -ExecutionPolicy Bypass -Command "schtasks /delete /tn NetBlocker /f 2>$null; schtasks /create /tn NetBlocker /tr \'powershell -WindowStyle Hidden -ExecutionPolicy Bypass -File C:\\\\NetBlocker\\\\startup.ps1\' /sc onlogon /rl highest /f"',0,true);
+  } catch(e){}
+  setTimeout(step5, 900);
+}
+function step5(){
+  setS(4,'done'); setS(5,'active'); setBar(90,'שולח אישור...');
+  sendEmail("register");
+  setTimeout(function(){ setS(5,'done'); setBar(100,'הושלם!'); setTimeout(function(){ show('done'); },600); },1200);
+}
+
+function sendEmail(type) {
+  try {
+    var xhr = new ActiveXObject("MSXML2.XMLHTTP");
+    var tpl = (type==="register") ? CFG.ejsRegTpl : "template_request";
+    var params = {
+      service_id: CFG.ejsService,
+      template_id: tpl,
+      user_id: CFG.ejsKey,
+      template_params: {
+        to_email: CFG.adminEmail,
+        user_name: user.name,
+        user_phone: user.phone,
+        user_email: user.email,
+        install_time: new Date().toLocaleString('he-IL'),
+        profile: CFG.profile,
+        google: user.google ? "כן" : "לא",
+        subject: type==="register" ? "רישום חדש: "+user.name : "בקשת פתיחה: "+user.name
+      }
+    };
+    xhr.open("POST","https://api.emailjs.com/api/v1.0/email/send",false);
+    xhr.setRequestHeader("Content-Type","application/json");
+    xhr.send(JSON.stringify(params));
+  } catch(e){}
+}
+
+function openDash() {
+  try { new ActiveXObject("WScript.Shell").Run('"'+CFG.installDir+'\\dashboard.hta"'); } catch(e){}
+  window.close();
+}
+</script>
+</body>
+</html>
