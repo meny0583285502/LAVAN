@@ -1,167 +1,146 @@
 <!DOCTYPE html>
 <html dir="rtl" lang="he">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NetBlocker — ניהול פרופילים</title>
-<style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Segoe UI', Arial, sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; padding: 24px; }
-h1 { font-size: 1.8rem; color: #60a5fa; margin-bottom: 4px; }
-.subtitle { color: #94a3b8; font-size: 0.9rem; margin-bottom: 28px; }
-.card { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 20px; margin-bottom: 16px; }
-.card h2 { font-size: 1rem; color: #93c5fd; margin-bottom: 14px; }
-label { font-size: 0.85rem; color: #94a3b8; display: block; margin-bottom: 4px; }
-input, select, textarea { width: 100%; background: #0f172a; border: 1px solid #475569; color: #e2e8f0; border-radius: 8px; padding: 8px 12px; font-size: 0.9rem; margin-bottom: 12px; font-family: inherit; }
-textarea { height: 130px; resize: vertical; font-family: monospace; }
-input:focus, select:focus, textarea:focus { outline: none; border-color: #60a5fa; }
-.row { display: flex; gap: 12px; }
-.row > div { flex: 1; }
-button { background: #2563eb; color: white; border: none; border-radius: 8px; padding: 10px 20px; font-size: 0.9rem; cursor: pointer; font-family: inherit; transition: background 0.2s; }
-button:hover { background: #1d4ed8; }
-button.secondary { background: #334155; }
-button.secondary:hover { background: #475569; }
-.output-box { background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 14px; font-family: monospace; font-size: 0.8rem; color: #86efac; white-space: pre-wrap; word-break: break-all; min-height: 70px; margin-top: 10px; }
-.tabs { display: flex; gap: 4px; margin-bottom: 16px; }
-.tab { padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; color: #94a3b8; background: transparent; border: 1px solid transparent; transition: all 0.2s; }
-.tab.active { background: #1e40af; color: white; border-color: #3b82f6; }
-.tab-content { display: none; }
-.tab-content.active { display: block; }
-.hint { font-size: 0.78rem; color: #64748b; margin-top: -8px; margin-bottom: 12px; }
-.alert { padding: 10px 14px; border-radius: 8px; font-size: 0.85rem; margin-bottom: 14px; }
-.alert.info { background: #1e3a5f; border: 1px solid #3b82f6; color: #93c5fd; }
-.alert.success { background: #14532d; border: 1px solid #22c55e; color: #86efac; }
-ol { padding-right: 20px; line-height: 2.2; color: #cbd5e1; font-size: 0.9rem; }
-code { background: #0f172a; padding: 1px 6px; border-radius: 4px; font-size: 0.85em; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NetBlocker Pro | מערכת ניהול מרחוק</title>
+    <style>
+        :root {
+            --primary: #3b82f6; --primary-hover: #2563eb;
+            --bg-dark: #0f172a; --bg-card: #1e293b;
+            --text-main: #f1f5f9; --text-muted: #94a3b8;
+            --border: #334155; --success: #10b981;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: var(--bg-dark); color: var(--text-main); line-height: 1.6; padding: 2rem; }
+        
+        .header { text-align: center; margin-bottom: 3rem; animation: fadeIn 1s ease-in-out; }
+        .header h1 { font-size: 2.5rem; background: linear-gradient(to right, #60a5fa, #a78bfa); -webkit-background-clip: text; color: transparent; margin-bottom: 10px; }
+        .header p { color: var(--text-muted); font-size: 1.1rem; }
+        
+        .container { max-width: 900px; margin: 0 auto; }
+        .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 2rem; margin-bottom: 2rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+        .card h2 { color: #fff; margin-bottom: 1.5rem; font-size: 1.3rem; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+        
+        .tabs { display: flex; gap: 10px; margin-bottom: 2rem; background: var(--bg-card); padding: 10px; border-radius: 12px; border: 1px solid var(--border); }
+        .tab { flex: 1; text-align: center; padding: 10px; border-radius: 8px; cursor: pointer; color: var(--text-muted); font-weight: bold; transition: all 0.3s; }
+        .tab.active { background: var(--primary); color: #fff; box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.5); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: slideIn 0.4s ease; }
+        
+        .form-group { margin-bottom: 1.5rem; }
+        label { display: block; margin-bottom: 8px; color: #cbd5e1; font-size: 0.95rem; }
+        input, select, textarea { width: 100%; background: var(--bg-dark); border: 1px solid var(--border); color: #fff; border-radius: 8px; padding: 12px; font-size: 1rem; transition: border 0.3s; }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: var(--primary); }
+        textarea { height: 120px; resize: vertical; font-family: monospace; }
+        
+        .btn { background: var(--primary); color: white; border: none; border-radius: 8px; padding: 12px 24px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: all 0.3s; width: 100%; }
+        .btn:hover { background: var(--primary-hover); transform: translateY(-2px); }
+        .btn.download { background: linear-gradient(135deg, #10b981, #059669); font-size: 1.2rem; padding: 15px; margin-bottom: 10px; }
+        .btn.download:hover { background: linear-gradient(135deg, #059669, #047857); }
+        
+        .code-box { background: #000; border: 1px solid var(--border); border-radius: 8px; padding: 15px; font-family: monospace; color: #a78bfa; white-space: pre-wrap; font-size: 0.9rem; direction: ltr; text-align: left; }
+        
+        .hint { font-size: 0.85rem; color: #64748b; margin-top: 5px; }
+        
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
 </head>
 <body>
 
-<h1>NetBlocker</h1>
-<p class="subtitle">ניהול פרופילי חסימה מרחוק — כל שינוי מתעדכן אוטומטית בהפעלה הבאה</p>
-
-<div class="tabs">
-  <div class="tab active" onclick="switchTab('editor')">עורך פרופיל</div>
-  <div class="tab" onclick="switchTab('install')">התקנה</div>
-</div>
-
-<div class="tab-content active" id="tab-editor">
-  <div class="card">
-    <h2>עורך פרופיל JSON</h2>
-    <div class="alert info">
-      לאחר יצירת ה-JSON — שמור אותו ב-GitHub שלך בתיקיית <code>profiles/שם.json</code>
+    <div class="header">
+        <h1>NetBlocker Pro (V2)</h1>
+        <p>מערכת הניהול המרכזית לחסימת אתרים מרחוק</p>
     </div>
 
-    <div class="row">
-      <div>
-        <label>שם פרופיל (אנגלית, ללא רווחים)</label>
-        <input type="text" id="profileName" placeholder="moshe" oninput="updateJSON()">
-      </div>
-      <div>
-        <label>מצב חסימה</label>
-        <select id="profileMode" onchange="updateJSON()">
-          <option value="blacklist">Blacklist — חסום אתרים ספציפיים</option>
-          <option value="whitelist">Whitelist — רק אלה מותרים</option>
-        </select>
-      </div>
+    <div class="container">
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('download')">הורדת תוכנה (EXE)</div>
+            <div class="tab" onclick="switchTab('profile')">יצירת פרופיל (JSON)</div>
+        </div>
+
+        <!-- טאב הורדה -->
+        <div id="tab-download" class="tab-content active">
+            <div class="card" style="text-align: center;">
+                <h2>התקנת המערכת אצל הלקוח</h2>
+                <p style="margin-bottom: 20px; color: var(--text-muted);">
+                    הורד את קובץ ההתקנה החכם. התוכנה תתקין את עצמה אוטומטית, תעלה עם המחשב, ותבקש מהמשתמש פרטים (שם, אימייל) ואזור אישי.
+                </p>
+                <!-- כאן יהיה הלינק לקובץ ה-EXE שלך בגיטאב -->
+                <button class="btn download" onclick="window.open('https://github.com/YOUR-USERNAME/YOUR-REPO/raw/main/NetBlockerSetup.exe')">
+                    ⬇️ הורד NetBlocker.exe עכשיו
+                </button>
+                <p class="hint">כל הבקשות לפתיחת אתרים יישלחו אוטומטית למייל: 6183444@gmail.com</p>
+            </div>
+        </div>
+
+        <!-- טאב יצירת פרופיל -->
+        <div id="tab-profile" class="tab-content">
+            <div class="card">
+                <h2>מחולל פרופילים (JSON)</h2>
+                
+                <div class="form-group">
+                    <label>שם הפרופיל (באנגלית, ללא רווחים)</label>
+                    <input type="text" id="profileName" placeholder="לדוגמה: yossi_computer" oninput="generateJSON()">
+                </div>
+
+                <div class="form-group">
+                    <label>מצב סינון</label>
+                    <select id="profileMode" onchange="generateJSON()">
+                        <option value="blacklist">Blacklist - חסימת האתרים שברשימה</option>
+                        <option value="whitelist">Whitelist - חסימת הכל פרט לרשימה</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>דומיינים לחסימה (שורה לכל דומיין)</label>
+                    <textarea id="blockedDomains" oninput="generateJSON()" placeholder="youtube.com&#10;facebook.com"></textarea>
+                    <p class="hint">יש להכניס את שם האתר ללא //:https</p>
+                </div>
+
+                <div class="form-group">
+                    <label>פלט JSON (להעתקה ושמירה בתיקיית profiles)</label>
+                    <div class="code-box" id="jsonOutput"></div>
+                </div>
+
+                <button class="btn" onclick="copyJSON()">📋 העתק קוד JSON</button>
+            </div>
+        </div>
     </div>
 
-    <label>דומיינים לחסימה (שורה לכל דומיין)</label>
-    <p class="hint">הוסף www. ו-m. לכל אתר. לדוגמה: youtube.com וגם www.youtube.com</p>
-    <textarea id="blockedDomains" oninput="updateJSON()" placeholder="youtube.com
-www.youtube.com
-facebook.com
-www.facebook.com
-instagram.com
-www.instagram.com"></textarea>
+    <script>
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById('tab-' + tabId).classList.add('active');
+        }
 
-    <label>חסימת אפליקציות — דומיינים של API (חומת אש)</label>
-    <p class="hint">לחסימת טלגרם: api.telegram.org | לחסימת Copilot: copilot.microsoft.com</p>
-    <textarea id="blockedApps" oninput="updateJSON()" style="height:90px" placeholder="api.telegram.org
-copilot.microsoft.com
-sydney.bing.com"></textarea>
+        function generateJSON() {
+            const name = document.getElementById('profileName').value || 'default';
+            const mode = document.getElementById('profileMode').value;
+            const blocked = document.getElementById('blockedDomains').value.split('\n').map(s=>s.trim()).filter(Boolean);
+            
+            const obj = {
+                profile_name: name,
+                mode: mode,
+                blocked_domains: blocked,
+                blocked_apps_domains: ["api.telegram.org", "copilot.microsoft.com"],
+                last_updated: new Date().toISOString().split('T')[0]
+            };
+            
+            document.getElementById('jsonOutput').textContent = JSON.stringify(obj, null, 4);
+        }
 
-    <label>JSON מוכן — העתק ושמור ב-GitHub</label>
-    <div class="output-box" id="jsonOutput">מלא שדות...</div>
-    <br>
-    <div style="display:flex;gap:8px;flex-wrap:wrap">
-      <button onclick="copyJSON()">העתק JSON</button>
-      <button class="secondary" onclick="window.open('https://github.com','_blank')">פתח GitHub</button>
-    </div>
-  </div>
-</div>
+        function copyJSON() {
+            const code = document.getElementById('jsonOutput').textContent;
+            navigator.clipboard.writeText(code);
+            alert('הקוד הועתק! צור קובץ בשם ' + (document.getElementById('profileName').value || 'default') + '.json בתיקיית profiles בגיטאב.');
+        }
 
-<div class="tab-content" id="tab-install">
-  <div class="card">
-    <h2>פקודת הפעלה ידנית (PowerShell)</h2>
-    <label>שם פרופיל</label>
-    <input type="text" id="installProfile" placeholder="moshe" oninput="updateCmd()">
-    <label>URL בסיס של GitHub Pages שלך</label>
-    <input type="text" id="githubBase" placeholder="https://username.github.io/repo-name/profiles" oninput="updateCmd()">
-    <label>פקודה — הרץ ב-PowerShell כמנהל</label>
-    <div class="output-box" id="installCmd">הכנס פרטים...</div>
-    <br>
-    <button onclick="copyCmd()">העתק פקודה</button>
-  </div>
-
-  <div class="card">
-    <h2>מה המשתמש עושה פעם אחת</h2>
-    <ol>
-      <li>מוריד את התיקייה עם <code>install.bat</code>, <code>blocker.ps1</code>, <code>startup_updater.ps1</code></li>
-      <li>לחץ ימני על <code>install.bat</code> &rarr; <b>הפעל כמנהל</b></li>
-      <li>ממלא שם פרופיל אם מתבקש</li>
-      <li>זהו! החסימה פעילה ומתעדכנת אוטומטית</li>
-    </ol>
-    <br>
-    <div class="alert success">
-      כל שינוי שתעשה בפרופיל ב-GitHub — יתעדכן אצלו בהפעלה הבאה של המחשב
-    </div>
-  </div>
-</div>
-
-<script>
-function switchTab(name) {
-  document.querySelectorAll('.tab').forEach((t,i) => {
-    t.classList.toggle('active', ['editor','install'][i] === name);
-  });
-  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-  document.getElementById('tab-' + name).classList.add('active');
-}
-
-function updateJSON() {
-  const name = document.getElementById('profileName').value || 'profile';
-  const mode = document.getElementById('profileMode').value;
-  const blocked = document.getElementById('blockedDomains').value.split('\n').map(s=>s.trim()).filter(Boolean);
-  const apps = document.getElementById('blockedApps').value.split('\n').map(s=>s.trim()).filter(Boolean);
-  const obj = {
-    profile: name, mode,
-    blocked_domains: blocked,
-    blocked_apps_domains: apps,
-    allowed_domains: [],
-    last_updated: new Date().toISOString().split('T')[0]
-  };
-  document.getElementById('jsonOutput').textContent = JSON.stringify(obj, null, 2);
-}
-
-function copyJSON() {
-  navigator.clipboard.writeText(document.getElementById('jsonOutput').textContent);
-  alert('JSON הועתק! שמור ב-GitHub: profiles/' + (document.getElementById('profileName').value||'profile') + '.json');
-}
-
-function updateCmd() {
-  const p = document.getElementById('installProfile').value || 'PROFILE';
-  const base = document.getElementById('githubBase').value || 'https://USERNAME.github.io/REPO/profiles';
-  document.getElementById('installCmd').textContent =
-    `powershell -ExecutionPolicy Bypass -File blocker.ps1 -ProfileName "${p}" -GitHubBase "${base}"`;
-}
-
-function copyCmd() {
-  navigator.clipboard.writeText(document.getElementById('installCmd').textContent);
-  alert('פקודה הועתקה!');
-}
-
-updateJSON();
-updateCmd();
-</script>
+        generateJSON(); // אתחול ראשוני
+    </script>
 </body>
 </html>
