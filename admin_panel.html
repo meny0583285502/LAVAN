@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NetBlocker — פאנל ניהול</title>
+<style>
+* { box-sizing:border-box; margin:0; padding:0; font-family:'Segoe UI',Arial,sans-serif; }
+body { background:#0f172a; color:#e2e8f0; min-height:100vh; }
+
+.header { background:#0c1426; border-bottom:1px solid #1e293b; padding:16px 28px; display:flex; align-items:center; justify-content:space-between; }
+.header-brand { display:flex; align-items:center; gap:12px; }
+.header h1 { font-size:1.2rem; color:#60a5fa; font-weight:800; }
+.header-sub { color:#64748b; font-size:0.78rem; }
+.header-email { color:#94a3b8; font-size:0.82rem; }
+
+.layout { display:flex; min-height:calc(100vh - 57px); }
+.sidebar { width:200px; background:#0c1426; border-left:1px solid #1e293b; padding:16px 0; }
+.nav-item { padding:10px 18px; color:#94a3b8; font-size:0.87rem; cursor:pointer; display:flex; align-items:center; gap:8px; border-right:3px solid transparent; }
+.nav-item:hover { background:#1e293b; color:#e2e8f0; }
+.nav-item.active { background:#1e3a5f; color:#60a5fa; border-right-color:#60a5fa; }
+
+.content { flex:1; padding:24px; }
+.page { display:none; }
+.page.active { display:block; }
+
+.card { background:#1e293b; border:1px solid #334155; border-radius:12px; padding:20px; margin-bottom:16px; }
+.card-title { color:#93c5fd; font-size:0.95rem; font-weight:700; margin-bottom:14px; }
+.stats { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:20px; }
+.stat { background:#1e293b; border:1px solid #334155; border-radius:10px; padding:16px; text-align:center; }
+.stat-val { font-size:1.8rem; font-weight:800; }
+.stat-lbl { font-size:0.75rem; color:#64748b; margin-top:3px; }
+
+table { width:100%; border-collapse:collapse; font-size:0.85rem; }
+th { text-align:right; padding:10px 12px; color:#64748b; font-size:0.78rem; border-bottom:1px solid #334155; font-weight:600; }
+td { padding:10px 12px; border-bottom:1px solid #1e293b; color:#cbd5e1; vertical-align:middle; }
+tr:hover td { background:#1e293b44; }
+
+.btn { border:none; border-radius:7px; padding:6px 14px; font-size:0.8rem; cursor:pointer; font-family:inherit; font-weight:600; }
+.btn-blue { background:#2563eb; color:white; }
+.btn-green { background:#16a34a; color:white; }
+.btn-red { background:#dc2626; color:white; }
+.btn-gray { background:#334155; color:#e2e8f0; }
+.btn:hover { opacity:0.85; }
+
+.badge { display:inline-block; padding:2px 10px; border-radius:99px; font-size:0.74rem; font-weight:600; }
+.badge-new { background:#1e3a5f; color:#93c5fd; }
+.badge-pending { background:#451a03; color:#fcd34d; }
+.badge-approved { background:#14532d; color:#86efac; }
+.badge-denied { background:#450a0a; color:#fca5a5; }
+
+.field { margin-bottom:12px; }
+.field label { display:block; font-size:0.82rem; color:#94a3b8; margin-bottom:4px; }
+.field input,.field select,.field textarea { width:100%; background:#0f172a; border:1.5px solid #334155; color:#e2e8f0; border-radius:8px; padding:9px 12px; font-size:0.9rem; outline:none; font-family:inherit; }
+.field textarea { height:90px; resize:vertical; }
+.field input:focus,.field select:focus { border-color:#60a5fa; }
+
+.row2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.alert { padding:10px 14px; border-radius:8px; font-size:0.85rem; margin-bottom:12px; }
+.alert-info { background:#1e3a5f; border:1px solid #3b82f6; color:#93c5fd; }
+.alert-success { background:#14532d; border:1px solid #22c55e; color:#86efac; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-brand">
+    <div style="font-size:28px">🛡️</div>
+    <div>
+      <h1>NetBlocker — פאנל ניהול</h1>
+      <div class="header-sub">ניהול משתמשים, פרופילים ובקשות</div>
+    </div>
+  </div>
+  <div class="header-email">6183444@gmail.com</div>
+</div>
+
+<div class="layout">
+  <div class="sidebar">
+    <div class="nav-item active" onclick="nav('dash',this)">📊 לוח בקרה</div>
+    <div class="nav-item" onclick="nav('profiles',this)">📋 פרופילים</div>
+    <div class="nav-item" onclick="nav('requests',this)">📩 בקשות פתיחה</div>
+    <div class="nav-item" onclick="nav('uninstalls',this)">🗑️ בקשות הסרה</div>
+    <div class="nav-item" onclick="nav('email',this)">✉️ שליחת מייל</div>
+    <div class="nav-item" onclick="nav('update',this)">🆕 עדכון גרסה</div>
+    <div class="nav-item" onclick="nav('setup',this)">⚙️ הגדרות EmailJS</div>
+  </div>
+
+  <div class="content">
+
+    <!-- DASH -->
+    <div class="page active" id="page-dash">
+      <div class="stats">
+        <div class="stat"><div class="stat-val" style="color:#60a5fa" id="totalProfiles">—</div><div class="stat-lbl">פרופילים</div></div>
+        <div class="stat"><div class="stat-val" style="color:#fcd34d" id="pendingReqs">0</div><div class="stat-lbl">בקשות ממתינות</div></div>
+        <div class="stat"><div class="stat-val" style="color:#86efac" id="approvedReqs">0</div><div class="stat-lbl">אושרו</div></div>
+        <div class="stat"><div class="stat-val" style="color:#f87171" id="pendingUninst">0</div><div class="stat-lbl">בקשות הסרה</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">⚡ פעולות מהירות</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn btn-blue" onclick="nav('profiles',document.querySelector('[onclick*=profiles]'))">+ פרופיל חדש</button>
+          <button class="btn btn-blue" onclick="nav('email',document.querySelector('[onclick*=email]'))">✉️ שלח מייל</button>
+          <button class="btn btn-blue" onclick="nav('update',document.querySelector('[onclick*=update]'))">🆕 שחרר עדכון</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">📘 מדריך שימוש</div>
+        <ol style="padding-right:18px;line-height:2.2;color:#94a3b8;font-size:0.88rem">
+          <li>צור פרופיל בלשונית <b>פרופילים</b> → שמור JSON ב-GitHub תחת <code>profiles/</code></li>
+          <li>שלח למשתמש את <code>install.bat</code> עם שאר הקבצים</li>
+          <li>הוא מריץ כמנהל → ממלא פרטים → NetBlocker פעיל</li>
+          <li>בקשות פתיחה/הסרה מגיעות אליך במייל <b>6183444@gmail.com</b></li>
+          <li>לאישור הסרה — צור קובץ <code>approvals/EMAIL_at_gmail.json</code> ב-GitHub</li>
+        </ol>
+      </div>
+    </div>
+
+    <!-- PROFILES -->
+    <div class="page" id="page-profiles">
+      <div class="card">
+        <div class="card-title">✏️ עורך פרופיל JSON</div>
+        <div class="row2">
+          <div class="field"><label>שם פרופיל</label><input id="pName" placeholder="moshe" oninput="genJson()"></div>
+          <div class="field"><label>מצב</label>
+            <select id="pMode" onchange="genJson()">
+              <option value="blacklist">Blacklist</option>
+              <option value="whitelist">Whitelist</option>
+            </select>
+          </div>
+        </div>
+        <div class="field"><label>דומיינים חסומים (שורה לכל אחד)</label>
+          <textarea id="pDomains" oninput="genJson()" placeholder="youtube.com&#10;www.youtube.com&#10;facebook.com"></textarea>
+        </div>
+        <div class="field"><label>חסימת אפליקציות (API domains)</label>
+          <textarea id="pApps" oninput="genJson()" style="height:70px" placeholder="api.telegram.org&#10;copilot.microsoft.com"></textarea>
+        </div>
+        <div class="field"><label>JSON מוכן — שמור ב-GitHub: <code>profiles/שם.json</code></label>
+          <textarea id="pJson" style="height:160px;font-family:monospace;font-size:0.8rem;color:#86efac" readonly></textarea>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-blue" onclick="copyJson()">📋 העתק JSON</button>
+          <button class="btn btn-gray" onclick="window.open('https://github.com/meny0583285502/LAVAN/tree/main/profiles','_blank')">🔗 GitHub</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- REQUESTS -->
+    <div class="page" id="page-requests">
+      <div class="card">
+        <div class="card-title">📩 בקשות פתיחת אתרים</div>
+        <div class="alert alert-info">הבקשות מגיעות לאימייל שלך. כאן תוכל לנהל את ההיסטוריה ידנית.</div>
+        <table>
+          <tr><th>משתמש</th><th>אתר מבוקש</th><th>תאריך</th><th>סטטוס</th><th>פעולה</th></tr>
+          <tr>
+            <td>לדוגמה: ישראל ישראלי</td>
+            <td>news.co.il</td>
+            <td>25/06/2026</td>
+            <td><span class="badge badge-pending">ממתין</span></td>
+            <td>
+              <button class="btn btn-green" style="margin-left:6px" onclick="approveReq(this)">אשר</button>
+              <button class="btn btn-red" onclick="denyReq(this)">דחה</button>
+            </td>
+          </tr>
+        </table>
+        <p style="color:#475569;font-size:0.78rem;margin-top:14px">* אישור — עדכן את ה-JSON של הפרופיל ב-GitHub להסרת הדומיין מהרשימה</p>
+      </div>
+    </div>
+
+    <!-- UNINSTALLS -->
+    <div class="page" id="page-uninstalls">
+      <div class="card">
+        <div class="card-title">🗑️ בקשות הסרת תוכנה</div>
+        <div class="alert alert-info">
+          לאישור הסרה — צור קובץ JSON ב-GitHub:<br>
+          <code>approvals/EMAIL_at_gmail.json</code> עם התוכן: <code>{"uninstall_approved": true}</code>
+        </div>
+        <div class="field"><label>אימייל המשתמש (לאישור הסרה)</label><input id="uninstEmail" placeholder="israel@gmail.com"></div>
+        <div class="field"><label>תוכן קובץ האישור</label>
+          <textarea id="uninstJson" style="height:60px;font-family:monospace;color:#86efac" readonly>{"uninstall_approved": true, "approved_by": "admin", "date": ""}</textarea>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-green" onclick="genUninstApproval()">צור קובץ אישור</button>
+          <button class="btn btn-gray" onclick="copyUninstJson()">📋 העתק</button>
+          <button class="btn btn-gray" onclick="window.open('https://github.com/meny0583285502/LAVAN/tree/main/approvals','_blank')">🔗 GitHub</button>
+        </div>
+        <p style="color:#475569;font-size:0.78rem;margin-top:12px">שם הקובץ: <span id="uninstFileName" style="color:#93c5fd">—</span></p>
+      </div>
+    </div>
+
+    <!-- EMAIL -->
+    <div class="page" id="page-email">
+      <div class="card">
+        <div class="card-title">✉️ שליחת מייל למשתמש</div>
+        <div class="row2">
+          <div class="field"><label>אימייל נמען</label><input id="eTo" placeholder="israel@gmail.com"></div>
+          <div class="field"><label>שם נמען</label><input id="eName" placeholder="ישראל ישראלי"></div>
+        </div>
+        <div class="field"><label>נושא</label><input id="eSubj" placeholder="עדכון מ-NetBlocker"></div>
+        <div class="field"><label>תוכן ההודעה</label><textarea id="eBody" placeholder="שלום ישראל,&#10;..."></textarea></div>
+        <button class="btn btn-blue" onclick="sendAdminEmail()">שלח מייל ←</button>
+        <div id="emailStatus" style="margin-top:10px;font-size:0.85rem;display:none"></div>
+      </div>
+    </div>
+
+    <!-- UPDATE -->
+    <div class="page" id="page-update">
+      <div class="card">
+        <div class="card-title">🆕 שחרור גרסה חדשה</div>
+        <div class="alert alert-info">
+          המשתמשים יראו באנר עדכון ב-Dashboard שלהם ויוכלו לעדכן בלחיצה.
+        </div>
+        <div class="row2">
+          <div class="field"><label>מספר גרסה</label><input id="newVer" placeholder="1.1.0"></div>
+          <div class="field"><label>URL לסקריפט מעודכן (אופציונלי)</label><input id="scriptUrl" placeholder="https://...blocker.ps1"></div>
+        </div>
+        <div class="field"><label>הערות גרסה</label><textarea id="verNotes" placeholder="תיאור מה השתנה..."></textarea></div>
+        <div class="field"><label>JSON לקובץ version.json ב-GitHub</label>
+          <textarea id="verJson" style="height:80px;font-family:monospace;font-size:0.8rem;color:#86efac" readonly></textarea>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-blue" onclick="genVerJson()">צור JSON</button>
+          <button class="btn btn-gray" onclick="copyVerJson()">📋 העתק</button>
+          <button class="btn btn-gray" onclick="window.open('https://github.com/meny0583285502/LAVAN','_blank')">🔗 GitHub</button>
+        </div>
+        <p style="color:#475569;font-size:0.78rem;margin-top:10px">שמור כ-<code>version.json</code> בשורש הריפו</p>
+      </div>
+    </div>
+
+    <!-- SETUP -->
+    <div class="page" id="page-setup">
+      <div class="card">
+        <div class="card-title">⚙️ הגדרות EmailJS</div>
+        <div class="alert alert-info">
+          <b>צעדים:</b><br>
+          1. הירשם ב-<a href="https://emailjs.com" target="_blank" style="color:#60a5fa">emailjs.com</a> (חינם עד 200 מיילים/חודש)<br>
+          2. הוסף Email Service עם Gmail שלך<br>
+          3. צור 3 Templates: <code>template_register</code>, <code>template_request</code>, <code>template_uninstall</code><br>
+          4. עדכן את הפרמטרים ב-setup.hta ו-dashboard.hta
+        </div>
+        <div class="field"><label>Service ID</label><input id="cfgService" placeholder="service_xxxxxxx"></div>
+        <div class="field"><label>Public Key</label><input id="cfgKey" placeholder="xxxxxxxxxxxxxxxxxxx"></div>
+        <div class="field"><label>Template — רישום</label><input id="cfgTpl1" value="template_register"></div>
+        <div class="field"><label>Template — בקשת פתיחה</label><input id="cfgTpl2" value="template_request"></div>
+        <div class="field"><label>Template — הסרה</label><input id="cfgTpl3" value="template_uninstall"></div>
+        <button class="btn btn-blue" onclick="copySetupCode()">📋 העתק קוד לעדכון HTA</button>
+        <div id="setupOut" style="margin-top:12px;background:#0f172a;border-radius:8px;padding:12px;font-family:monospace;font-size:0.8rem;color:#86efac;display:none;white-space:pre-wrap"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+function nav(id, el) {
+  document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active'));
+  if(el) el.classList.add('active');
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+}
+
+// Profile JSON
+function genJson() {
+  const n = document.getElementById('pName').value||'profile';
+  const m = document.getElementById('pMode').value;
+  const d = document.getElementById('pDomains').value.split('\n').map(s=>s.trim()).filter(Boolean);
+  const a = document.getElementById('pApps').value.split('\n').map(s=>s.trim()).filter(Boolean);
+  const obj = {profile:n,mode:m,blocked_domains:d,blocked_apps_domains:a,allowed_domains:[],last_updated:new Date().toISOString().split('T')[0]};
+  document.getElementById('pJson').value = JSON.stringify(obj,null,2);
+}
+function copyJson() {
+  navigator.clipboard.writeText(document.getElementById('pJson').value);
+  alert('JSON הועתק! שמור ב-GitHub: profiles/'+document.getElementById('pName').value+'.json');
+}
+
+// Uninstall approval
+function genUninstApproval() {
+  const email = document.getElementById('uninstEmail').value;
+  if(!email){alert('הכנס אימייל');return;}
+  const fname = email.replace('@','_at_')+'.json';
+  document.getElementById('uninstFileName').innerText = fname;
+  const obj = {uninstall_approved:true,approved_by:"admin",date:new Date().toISOString().split('T')[0]};
+  document.getElementById('uninstJson').value = JSON.stringify(obj,null,2);
+}
+function copyUninstJson() {
+  navigator.clipboard.writeText(document.getElementById('uninstJson').value);
+  alert('הועתק! שמור ב-GitHub תחת: approvals/'+document.getElementById('uninstFileName').innerText);
+}
+
+// Version
+function genVerJson() {
+  const v = document.getElementById('newVer').value||'1.0.1';
+  const n = document.getElementById('verNotes').value;
+  const s = document.getElementById('scriptUrl').value;
+  const obj = {version:v,notes:n,released:new Date().toISOString().split('T')[0]};
+  if(s) obj.script_url=s;
+  document.getElementById('verJson').value = JSON.stringify(obj,null,2);
+}
+function copyVerJson() {
+  navigator.clipboard.writeText(document.getElementById('verJson').value);
+  alert('הועתק! שמור כ-version.json בשורש הריפו');
+}
+
+// Email
+function sendAdminEmail() {
+  const cfg = {svc:localStorage.getItem('ejs_svc'),key:localStorage.getItem('ejs_key')};
+  if(!cfg.svc||!cfg.key){alert('הגדר EmailJS תחילה בלשונית הגדרות');return;}
+  const params = {
+    service_id: cfg.svc,
+    template_id: 'template_admin_msg',
+    user_id: cfg.key,
+    template_params: {
+      to_email: document.getElementById('eTo').value,
+      to_name: document.getElementById('eName').value,
+      subject: document.getElementById('eSubj').value,
+      message: document.getElementById('eBody').value,
+      from_name: 'NetBlocker Admin'
+    }
+  };
+  fetch('https://api.emailjs.com/api/v1.0/email/send', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(params)})
+    .then(r=>{
+      const el=document.getElementById('emailStatus');
+      el.style.display='block';
+      el.style.color = r.ok?'#86efac':'#f87171';
+      el.innerText = r.ok?'✅ מייל נשלח בהצלחה!':'❌ שגיאה בשליחה';
+    });
+}
+
+function copySetupCode() {
+  const svc=document.getElementById('cfgService').value;
+  const key=document.getElementById('cfgKey').value;
+  localStorage.setItem('ejs_svc',svc);
+  localStorage.setItem('ejs_key',key);
+  const code = `var CFG = {\n  ejsService: "${svc}",\n  ejsTplReq:  "${document.getElementById('cfgTpl2').value}",\n  ejsTplUninst:"${document.getElementById('cfgTpl3').value}",\n  ejsKey:     "${key}"\n};`;
+  document.getElementById('setupOut').style.display='block';
+  document.getElementById('setupOut').innerText=code;
+  navigator.clipboard.writeText(code);
+  alert('קוד הועתק! הדבק ב-setup.hta ו-dashboard.hta');
+}
+
+function approveReq(btn) {
+  const row = btn.closest('tr');
+  row.querySelector('.badge').className='badge badge-approved';
+  row.querySelector('.badge').innerText='אושר';
+  btn.parentElement.innerHTML='<span style="color:#86efac;font-size:0.82rem">✅ אושר</span>';
+}
+function denyReq(btn) {
+  const row = btn.closest('tr');
+  row.querySelector('.badge').className='badge badge-denied';
+  row.querySelector('.badge').innerText='נדחה';
+  btn.parentElement.innerHTML='<span style="color:#f87171;font-size:0.82rem">❌ נדחה</span>';
+}
+
+genJson();
+</script>
+</body>
+</html>
