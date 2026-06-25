@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NetBlocker — ניהול פרופילים</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', Arial, sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; padding: 24px; }
+h1 { font-size: 1.8rem; color: #60a5fa; margin-bottom: 4px; }
+.subtitle { color: #94a3b8; font-size: 0.9rem; margin-bottom: 28px; }
+.card { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+.card h2 { font-size: 1rem; color: #93c5fd; margin-bottom: 14px; }
+label { font-size: 0.85rem; color: #94a3b8; display: block; margin-bottom: 4px; }
+input, select, textarea { width: 100%; background: #0f172a; border: 1px solid #475569; color: #e2e8f0; border-radius: 8px; padding: 8px 12px; font-size: 0.9rem; margin-bottom: 12px; font-family: inherit; }
+textarea { height: 130px; resize: vertical; font-family: monospace; }
+input:focus, select:focus, textarea:focus { outline: none; border-color: #60a5fa; }
+.row { display: flex; gap: 12px; }
+.row > div { flex: 1; }
+button { background: #2563eb; color: white; border: none; border-radius: 8px; padding: 10px 20px; font-size: 0.9rem; cursor: pointer; font-family: inherit; transition: background 0.2s; }
+button:hover { background: #1d4ed8; }
+button.secondary { background: #334155; }
+button.secondary:hover { background: #475569; }
+.output-box { background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 14px; font-family: monospace; font-size: 0.8rem; color: #86efac; white-space: pre-wrap; word-break: break-all; min-height: 70px; margin-top: 10px; }
+.tabs { display: flex; gap: 4px; margin-bottom: 16px; }
+.tab { padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; color: #94a3b8; background: transparent; border: 1px solid transparent; transition: all 0.2s; }
+.tab.active { background: #1e40af; color: white; border-color: #3b82f6; }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+.hint { font-size: 0.78rem; color: #64748b; margin-top: -8px; margin-bottom: 12px; }
+.alert { padding: 10px 14px; border-radius: 8px; font-size: 0.85rem; margin-bottom: 14px; }
+.alert.info { background: #1e3a5f; border: 1px solid #3b82f6; color: #93c5fd; }
+.alert.success { background: #14532d; border: 1px solid #22c55e; color: #86efac; }
+ol { padding-right: 20px; line-height: 2.2; color: #cbd5e1; font-size: 0.9rem; }
+code { background: #0f172a; padding: 1px 6px; border-radius: 4px; font-size: 0.85em; }
+</style>
+</head>
+<body>
+
+<h1>NetBlocker</h1>
+<p class="subtitle">ניהול פרופילי חסימה מרחוק — כל שינוי מתעדכן אוטומטית בהפעלה הבאה</p>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('editor')">עורך פרופיל</div>
+  <div class="tab" onclick="switchTab('install')">התקנה</div>
+</div>
+
+<div class="tab-content active" id="tab-editor">
+  <div class="card">
+    <h2>עורך פרופיל JSON</h2>
+    <div class="alert info">
+      לאחר יצירת ה-JSON — שמור אותו ב-GitHub שלך בתיקיית <code>profiles/שם.json</code>
+    </div>
+
+    <div class="row">
+      <div>
+        <label>שם פרופיל (אנגלית, ללא רווחים)</label>
+        <input type="text" id="profileName" placeholder="moshe" oninput="updateJSON()">
+      </div>
+      <div>
+        <label>מצב חסימה</label>
+        <select id="profileMode" onchange="updateJSON()">
+          <option value="blacklist">Blacklist — חסום אתרים ספציפיים</option>
+          <option value="whitelist">Whitelist — רק אלה מותרים</option>
+        </select>
+      </div>
+    </div>
+
+    <label>דומיינים לחסימה (שורה לכל דומיין)</label>
+    <p class="hint">הוסף www. ו-m. לכל אתר. לדוגמה: youtube.com וגם www.youtube.com</p>
+    <textarea id="blockedDomains" oninput="updateJSON()" placeholder="youtube.com
+www.youtube.com
+facebook.com
+www.facebook.com
+instagram.com
+www.instagram.com"></textarea>
+
+    <label>חסימת אפליקציות — דומיינים של API (חומת אש)</label>
+    <p class="hint">לחסימת טלגרם: api.telegram.org | לחסימת Copilot: copilot.microsoft.com</p>
+    <textarea id="blockedApps" oninput="updateJSON()" style="height:90px" placeholder="api.telegram.org
+copilot.microsoft.com
+sydney.bing.com"></textarea>
+
+    <label>JSON מוכן — העתק ושמור ב-GitHub</label>
+    <div class="output-box" id="jsonOutput">מלא שדות...</div>
+    <br>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button onclick="copyJSON()">העתק JSON</button>
+      <button class="secondary" onclick="window.open('https://github.com','_blank')">פתח GitHub</button>
+    </div>
+  </div>
+</div>
+
+<div class="tab-content" id="tab-install">
+  <div class="card">
+    <h2>פקודת הפעלה ידנית (PowerShell)</h2>
+    <label>שם פרופיל</label>
+    <input type="text" id="installProfile" placeholder="moshe" oninput="updateCmd()">
+    <label>URL בסיס של GitHub Pages שלך</label>
+    <input type="text" id="githubBase" placeholder="https://username.github.io/repo-name/profiles" oninput="updateCmd()">
+    <label>פקודה — הרץ ב-PowerShell כמנהל</label>
+    <div class="output-box" id="installCmd">הכנס פרטים...</div>
+    <br>
+    <button onclick="copyCmd()">העתק פקודה</button>
+  </div>
+
+  <div class="card">
+    <h2>מה המשתמש עושה פעם אחת</h2>
+    <ol>
+      <li>מוריד את התיקייה עם <code>install.bat</code>, <code>blocker.ps1</code>, <code>startup_updater.ps1</code></li>
+      <li>לחץ ימני על <code>install.bat</code> &rarr; <b>הפעל כמנהל</b></li>
+      <li>ממלא שם פרופיל אם מתבקש</li>
+      <li>זהו! החסימה פעילה ומתעדכנת אוטומטית</li>
+    </ol>
+    <br>
+    <div class="alert success">
+      כל שינוי שתעשה בפרופיל ב-GitHub — יתעדכן אצלו בהפעלה הבאה של המחשב
+    </div>
+  </div>
+</div>
+
+<script>
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach((t,i) => {
+    t.classList.toggle('active', ['editor','install'][i] === name);
+  });
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+}
+
+function updateJSON() {
+  const name = document.getElementById('profileName').value || 'profile';
+  const mode = document.getElementById('profileMode').value;
+  const blocked = document.getElementById('blockedDomains').value.split('\n').map(s=>s.trim()).filter(Boolean);
+  const apps = document.getElementById('blockedApps').value.split('\n').map(s=>s.trim()).filter(Boolean);
+  const obj = {
+    profile: name, mode,
+    blocked_domains: blocked,
+    blocked_apps_domains: apps,
+    allowed_domains: [],
+    last_updated: new Date().toISOString().split('T')[0]
+  };
+  document.getElementById('jsonOutput').textContent = JSON.stringify(obj, null, 2);
+}
+
+function copyJSON() {
+  navigator.clipboard.writeText(document.getElementById('jsonOutput').textContent);
+  alert('JSON הועתק! שמור ב-GitHub: profiles/' + (document.getElementById('profileName').value||'profile') + '.json');
+}
+
+function updateCmd() {
+  const p = document.getElementById('installProfile').value || 'PROFILE';
+  const base = document.getElementById('githubBase').value || 'https://USERNAME.github.io/REPO/profiles';
+  document.getElementById('installCmd').textContent =
+    `powershell -ExecutionPolicy Bypass -File blocker.ps1 -ProfileName "${p}" -GitHubBase "${base}"`;
+}
+
+function copyCmd() {
+  navigator.clipboard.writeText(document.getElementById('installCmd').textContent);
+  alert('פקודה הועתקה!');
+}
+
+updateJSON();
+updateCmd();
+</script>
+</body>
+</html>
